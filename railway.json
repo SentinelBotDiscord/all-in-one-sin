@@ -1,0 +1,85 @@
+import os
+import json
+import discord
+from discord.ext import commands
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")) as f:
+    CONFIG = json.load(f)
+
+PREFIX = CONFIG.get("prefix", ".")
+
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
+intents.moderation = True
+
+INITIAL_EXTENSIONS = [
+    "cogs.sin",
+    "cogs.moderation",
+    "cogs.antinuke",
+    "cogs.antimod",
+    "cogs.boost",
+    "cogs.application",
+]
+
+
+class SinBot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix=PREFIX, intents=intents, help_command=None)
+        self.config = CONFIG
+
+    async def setup_hook(self):
+        for ext in INITIAL_EXTENSIONS:
+            await self.load_extension(ext)
+
+
+bot = SinBot()
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+    print(f"Prefix: {PREFIX}")
+    try:
+        synced_guilds = len(bot.guilds)
+        print(f"Connected to {synced_guilds} guild(s).")
+    except Exception:
+        pass
+    await bot.change_presence(activity=discord.Game(name=f"{PREFIX}sin | All-in-one bot"))
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to use this command.")
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send("❌ I'm missing permissions needed to do that.")
+    elif isinstance(error, commands.MemberNotFound):
+        await ctx.send("❌ Member not found.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"❌ Missing argument: `{error.param.name}`. Use `{PREFIX}sin` for help.")
+    elif isinstance(error, commands.CommandNotFound):
+        return
+    else:
+        await ctx.send(f"❌ An error occurred: {error}")
+        raise error
+
+
+def main():
+    token = os.environ.get("DISCORD_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "DISCORD_TOKEN environment variable is not set. "
+            "Set it in your .env file (local) or in Railway's Variables tab."
+        )
+    bot.run(token)
+
+
+if __name__ == "__main__":
+    main()
