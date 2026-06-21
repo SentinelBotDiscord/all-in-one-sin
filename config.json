@@ -1,3 +1,25 @@
-# Copy this file to .env for local testing, or set DISCORD_TOKEN
-# as a Variable in your Railway project (Variables tab).
-DISCORD_TOKEN=your_bot_token_here
+{
+  "prefix": ".",
+  "creator_name": "YourNameHere",
+  "swear_words": [
+    "fuck",
+    "bitch",
+    "nigga",
+    "nga",
+    "fck",
+    "bih",
+    "nigga",
+    "dick",
+    "jacass",
+    "sex"
+  ],
+  "application_required_days": 30,
+  "application_required_messages": 500,
+  "key_uses": 5,
+  "boost_perks": {
+    "1": 5,
+    "2": 12,
+    "3": 15,
+    "5": 100
+  }
+}
